@@ -1,0 +1,29 @@
+---
+# This playbook contains plays to deploy a strimzi (kafka) cluster
+# in an isolated namespace
+
+- set_fact:
+    install_url: "https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.11.1/strimzi-cluster-operator-0.11.1.yaml"
+    template_url: "https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.11.1/examples/kafka/kafka-persistent.yaml"
+
+- block:
+    - name: Create a '{{ kafka_namespace }}' namespace
+      command: kubectl create ns {{ kafka_namespace }}
+
+    - name: Download strimzi installation files
+      shell: "curl -s -L {{ install_url }} \\ 
+      | sed 's/namespace: .*/namespace: {{ kafka_namespace }}/' \\
+      | kubectl -n {{ kafka_namespace }} apply -f -"
+      register: result
+      failed_when: result.stderr != "" and "already exists" not in result.stderr
+
+    - name: Provision a simple cluster
+      command: kubectl apply -f {{ template_url }} -n {{ kafka_namespace }}
+
+  # Clean up if the tasks fail
+  rescue:
+    - debug:
+        msg: "Strimzi playbook failed. Cleaning up..."
+
+    - name: Deleting {{ kafka_namespace }} namespace
+      command: kubectl delete ns {{ kafka_namespace }}

@@ -1,0 +1,9 @@
+---
+# This playbook deploys the whole application stack in this site.
+
+- hosts: localhost
+  remote_user: root
+
+  roles:
+    - strimzi
+    - kubeless

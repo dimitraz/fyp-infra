@@ -1,0 +1,3 @@
+kubeless_namespace: kubeless
+kafka_namespace: kafka
+kafka_cluster_name: cluster

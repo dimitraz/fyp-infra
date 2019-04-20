@@ -1,0 +1,21 @@
+---
+# This playbook contains plays to deploy all of the services
+# and functions needed to run my final year project
+
+- template:
+    src: mongo-stateful-set.yml.j2
+    dest: /tmp/mongo-stateful-set.yaml
+
+- name: Create trigger controller deployment
+  command: "kubectl create -f /tmp/mongo-stateful-set.yaml"
+  register: result
+  failed_when: result.stderr != "" and "already exists" not in result.stderr
+
+  - name: Wait for Mongo to start
+  shell: "kubectl get pods -o json"
+  register: kubectl_get_pods
+  until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
+  retries: 20
+  delay: 3
+
+- file: path=/tmp/mongo-stateful-set.yaml state=absent

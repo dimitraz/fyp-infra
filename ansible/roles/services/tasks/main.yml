@@ -55,3 +55,14 @@
 
 - name: Create a trigger
   shell: "kubeless trigger kafka create ai-trigger --function-selector function=tf-predict,created-by=kubeless --trigger-topic vital-signs"
+
+- template:
+    src: kafka-streamer.yml.j2
+    dest: /tmp/kafka-streamer.yaml
+
+- name: Create the kafka streamer deployment and service
+  command: "kubectl create -f /tmp/kafka-streamer.yaml"
+  register: result
+  failed_when: result.stderr != "" and "already exists" not in result.stderr
+
+- file: path=/tmp/kafka-streamer.yaml state=absent

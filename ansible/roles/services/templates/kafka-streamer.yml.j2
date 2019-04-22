@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: stream-golang
+  labels:
+    app: stream-golang
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: stream-golang
+  template:
+    metadata:
+      labels:
+        app: stream-golang
+    spec:
+      containers:
+        - name: stream-golang
+          image: dimitraz/kafka-streamer:1.0.1
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 9002
+          env:
+            - name: LOG_LEVEL
+              value: info
+            - name: SERVERS
+              value: {{ kafka_cluster_name }}-kafka-bootstrap.{{ kafka_namespace }}:9092
+          livenessProbe:
+            httpGet:
+              path: /isalive
+              port: 9002
+            initialDelaySeconds: 55
+            timeoutSeconds: 5
+            periodSeconds: 60
+            successThreshold: 1
+            failureThreshold: 21
+          readinessProbe:
+            httpGet:
+              path: /isalive
+              port: 9002
+            initialDelaySeconds: 0
+            timeoutSeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 1
+
+---
+kind: Service
+apiVersion: v1
+metadata:
+  name: stream-golang
+spec:
+  selector:
+    app: stream-golang
+  ports:
+    - name: stream-port
+      protocol: TCP
+      port: 9002
+      targetPort: 9002

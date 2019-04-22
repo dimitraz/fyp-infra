@@ -1,2 +1,6 @@
 .DS_Store
 site.retry
+dimitra_witcloud.pem
+
+.terraform
+terraform.tfstate*

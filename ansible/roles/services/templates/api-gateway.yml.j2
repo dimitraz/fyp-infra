@@ -1,0 +1,59 @@
+kind: Service
+apiVersion: v1
+metadata:
+  name: nginx-service
+  labels:
+    name: nginx-service
+spec:
+  selector:
+    app: nginx
+  ports:
+    - name: nginx-port
+      port: 80
+      targetPort: 8080
+      protocol: TCP
+  type: LoadBalancer
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: nginx
+  labels:
+    app: nginx
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: nginx
+  template:
+    metadata:
+      labels:
+        app: nginx
+    spec:
+      containers:
+        - name: nginx
+          image: dimitraz/reverse-nginx:1.0.0
+          imagePullPolicy: Always
+          ports:
+            - containerPort: 8080
+          env:
+            - name: LOG_LEVEL
+              value: info
+          livenessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 55
+            timeoutSeconds: 5
+            periodSeconds: 60
+            successThreshold: 1
+            failureThreshold: 2
+          readinessProbe:
+            httpGet:
+              path: /
+              port: 8080
+            initialDelaySeconds: 0
+            timeoutSeconds: 5
+            periodSeconds: 10
+            successThreshold: 1
+            failureThreshold: 1

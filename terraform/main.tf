@@ -5,7 +5,7 @@ provider "aws" {
 
 // Create a VPC
 resource "aws_vpc" "dz_vpc" {
-  cidr_block           = "20.0.0.0/16"
+  cidr_block           = "${var.vpc_cidr}"
   enable_dns_hostnames = true
 
   tags {
@@ -71,7 +71,7 @@ resource "aws_route_table_association" "public_a" {
 resource "aws_nat_gateway" "ng" {
   count         = 1
   allocation_id = "${var.allocation_id}"
-  subnet_id     = "${aws_subnet.private_subnets.*.id[count.index]}"
+  subnet_id     = "${aws_subnet.public_subnets.*.id[count.index]}"
 
   tags {
     Name = "dz_ng"
@@ -99,4 +99,28 @@ resource "aws_route_table_association" "private_a" {
   count          = "${length(var.vpc_private_subnet_ips)}"
   subnet_id      = "${element(aws_subnet.private_subnets.*.id, count.index)}"
   route_table_id = "${aws_route_table.private_r.id}"
+}
+
+module "dz-fyp" {
+  source       = "terraform-aws-modules/eks/aws"
+  cluster_name = "dz-fyp"
+  subnets      = ["${concat(aws_subnet.private_subnets.*.id, aws_subnet.public_subnets.*.id)}"]
+  vpc_id       = "${aws_vpc.dz_vpc.id}"
+
+  worker_groups = [
+    {
+      instance_type        = "t2.medium"
+      ami_id               = "${var.worker_ami_id}"
+      asg_desired_capacity = "4"
+      asg_max_size         = "5"
+      asg_min_size         = "3"
+      root_volume_size     = "20"
+      key_name             = "dimitra_witcloud"
+      subnets              = "${join(",", aws_subnet.private_subnets.*.id)}"
+    },
+  ]
+
+  tags = {
+    environment = "test"
+  }
 }

@@ -1,6 +1,14 @@
+
 .DS_Store
-site.retry
 dimitra_witcloud.pem
 
-.terraform
+# Ansible
+site.retry
+
+# Terraform
+.terraform*
 terraform.tfstate*
+
+# Terraform output
+kubeconfig*
+config-map-aws-auth*

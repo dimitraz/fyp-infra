@@ -1,6 +1,11 @@
+variable "vpc_cidr" {
+  description = "CIDR block for the vpc"
+  default     = "10.0.0.0/16"
+}
+
 variable "vpc_public_subnet_ips" {
   type    = "list"
-  default = ["20.0.0.0/24", "20.0.1.0/24", "20.0.2.0/24"]
+  default = ["10.0.0.0/24", "10.0.1.0/24", "10.0.2.0/24"]
 }
 
 variable "vpc_public_subnet_names" {
@@ -10,7 +15,7 @@ variable "vpc_public_subnet_names" {
 
 variable "vpc_private_subnet_ips" {
   type    = "list"
-  default = ["20.0.3.0/24", "20.0.4.0/24", "20.0.5.0/24"]
+  default = ["10.0.3.0/24", "10.0.4.0/24", "10.0.5.0/24"]
 }
 
 variable "vpc_private_subnet_names" {
@@ -36,4 +41,9 @@ variable "aws_region" {
 variable "aws_profile" {
   description = "AWS profile"
   default     = "teststudent21"
+}
+
+variable "worker_ami_id" {
+  description = "eu-west-1 eks optimised AMI id for the worker nodes"
+  default     = "ami-098fb7e9b507904e7"
 }

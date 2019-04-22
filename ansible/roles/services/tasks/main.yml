@@ -37,3 +37,21 @@
 
 - name: Create a trigger
   shell: "kubeless trigger kafka create consumer-trigger --function-selector function=js-consumer,created-by=kubeless --trigger-topic vital-signs"
+
+- name: Clone the ai prediction repo
+  git:
+    repo: git@github.com:dimitraz/ai-medical-prediction.git
+    dest: ~/Desktop/services/ai-medical-prediction
+    clone: yes
+    recursive: yes
+    force: yes
+    accept_hostkey: yes
+    version: master
+    key_file: "~/.ssh/id_rsa"
+  delegate_to: localhost
+
+- name: Deploy the function
+  shell: "cd  ~/Desktop/services/ai-medical-prediction && zip predict model.json handler.js group1-shard1of1 && kubeless function deploy tf-predict --runtime nodejs8 --from-file predict.zip --handler handler.predict --dependencies package.json"
+
+- name: Create a trigger
+  shell: "kubeless trigger kafka create ai-trigger --function-selector function=tf-predict,created-by=kubeless --trigger-topic vital-signs"

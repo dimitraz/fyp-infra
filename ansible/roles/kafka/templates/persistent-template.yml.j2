@@ -1,11 +1,11 @@
 apiVersion: kafka.strimzi.io/v1alpha1
 kind: Kafka
 metadata:
-  name: my-cluster
+  name: {{ kafka_cluster_name }}
 spec:
   kafka:
     version: 2.1.0
-    replicas: 2
+    replicas: {{ kafka_replicas }}
     listeners:
       plain: {}
       tls: {}
@@ -19,7 +19,7 @@ spec:
       size: 100Gi
       deleteClaim: false
   zookeeper:
-    replicas: 3
+    replicas: {{ zookeper_replicas }}
     storage:
       type: persistent-claim
       size: 100Gi

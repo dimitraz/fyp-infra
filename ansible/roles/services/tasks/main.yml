@@ -11,11 +11,29 @@
   register: result
   failed_when: result.stderr != "" and "already exists" not in result.stderr
 
-  - name: Wait for Mongo to start
+- name: Wait for Mongo to start
   shell: "kubectl get pods -o json"
   register: kubectl_get_pods
   until: kubectl_get_pods.stdout|from_json|json_query('items[*].status.phase')|unique == ["Running"]
-  retries: 20
-  delay: 3
+  retries: 40
+  delay: 5
 
 - file: path=/tmp/mongo-stateful-set.yaml state=absent
+
+- name: Clone the repo
+  git:
+    repo: git@github.com:dimitraz/serverless-consumer.git
+    dest: ~/Desktop/services/serverless-consumer
+    clone: yes
+    recursive: yes
+    force: yes
+    accept_hostkey: yes
+    version: master
+    key_file: "~/.ssh/id_rsa"
+  delegate_to: localhost
+
+- name: Deploy the function
+  shell: "cd  ~/Desktop/services/serverless-consumer && kubeless function deploy js-consumer --runtime nodejs6 --handler handler.consume --from-file handler.js --dependencies package.json"
+
+- name: Create a trigger
+  shell: "kubeless trigger kafka create consumer-trigger --function-selector function=js-consumer,created-by=kubeless --trigger-topic vital-signs"

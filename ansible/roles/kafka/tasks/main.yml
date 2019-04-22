@@ -4,7 +4,6 @@
 
 - set_fact:
     install_url: "https://github.com/strimzi/strimzi-kafka-operator/releases/download/0.11.1/strimzi-cluster-operator-0.11.1.yaml"
-    template_url: "https://raw.githubusercontent.com/strimzi/strimzi-kafka-operator/0.11.1/examples/kafka/kafka-persistent.yaml"
 
 - block:
     - name: Create a '{{ kafka_namespace }}' namespace
@@ -17,13 +16,22 @@
       register: result
       failed_when: result.stderr != "" and "already exists" not in result.stderr
 
+    # Create the persistent template with 3 Kafka replicas 
+    # and 3 zookeeper replicas
+    - template:
+        src: persistent-template.yml.j2
+        dest: /tmp/persistent-template.yaml
+
     - name: Provision a simple cluster
-      command: kubectl apply -f {{ template_url }} -n {{ kafka_namespace }}
+      command: kubectl apply -f /tmp/persistent-template.yaml -n {{ kafka_namespace }}
+
+    # Delete the temp file
+    - file: path=/tmp/persistent-template.yaml state=absent
 
   # Clean up if the tasks fail
   rescue:
     - debug:
-        msg: "Strimzi playbook failed. Cleaning up..."
+        msg: "Kafka playbook failed. Cleaning up..."
 
     - name: Deleting {{ kafka_namespace }} namespace
       command: kubectl delete ns {{ kafka_namespace }}

@@ -25,6 +25,7 @@
       register: result
       failed_when: result.stderr != "" and "already exists" not in result.stderr
 
+    # Delete the temp file
     - file: path=/tmp/trigger-controller.yaml state=absent
 
   # Clean up if the tasks fail

@@ -1,0 +1,54 @@
+apiVersion: extensions/v1beta1
+kind: Deployment
+metadata:
+  name: gorush
+  namespace: {{ gorush_namespace }}
+spec:
+  replicas: 3
+  template:
+    metadata:
+      labels:
+        app: gorush
+        tier: frontend
+    spec:
+      containers:
+      - image: appleboy/gorush
+        name: gorush
+        imagePullPolicy: Always
+        ports:
+        - containerPort: 8088
+        livenessProbe:
+          httpGet:
+            path: /healthz
+            port: 8088
+          initialDelaySeconds: 3
+          periodSeconds: 3
+        env:
+        - name: GORUSH_STAT_ENGINE
+          valueFrom:
+            configMapKeyRef:
+              name: gorush-config
+              key: stat.engine
+        - name: GORUSH_STAT_REDIS_ADDR
+          valueFrom:
+            configMapKeyRef:
+              name: gorush-config
+              key: stat.redis.host
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: gorush
+  namespace: {{ gorush_namespace }}
+  labels:
+    app: gorush
+    tier: frontend
+spec:
+  selector:
+    app: gorush
+    tier: frontend
+  type: LoadBalancer
+  ports:
+  - protocol: TCP
+    port: 80
+    targetPort: 8088

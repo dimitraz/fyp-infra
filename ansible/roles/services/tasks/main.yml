@@ -77,3 +77,25 @@
   failed_when: result.stderr != "" and "already exists" not in result.stderr
 
 - file: path=/tmp/api-gateway.yaml state=absent
+
+- template:
+    src: gorush-redis.yml.j2
+    dest: /tmp/gorush-redis.yaml
+
+- name: Deploy gorush push server
+  command: "kubectl create -f /tmp/gorush-redis.yaml"
+  register: result
+  failed_when: result.stderr != "" and "already exists" not in result.stderr
+
+- file: path=/tmp/gorush-redis.yaml state=absent
+
+- template:
+    src: gorush.yml.j2
+    dest: /tmp/gorush.yaml
+
+- name: Deploy gorush push server
+  command: "kubectl create -f /tmp/gorush.yaml"
+  register: result
+  failed_when: result.stderr != "" and "already exists" not in result.stderr
+
+- file: path=/tmp/gorush.yaml state=absent

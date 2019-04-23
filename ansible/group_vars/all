@@ -1,6 +1,7 @@
 kubeless_namespace: kubeless
 kafka_namespace: kafka
-kafka_cluster_name: my-cluster
+gorush_namespace: gorush
 
+kafka_cluster_name: my-cluster
 zookeper_replicas: 3
-kafka_replicas: 3
+kafka_replicas: 3 

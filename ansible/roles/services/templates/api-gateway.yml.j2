@@ -1,15 +1,15 @@
 kind: Service
 apiVersion: v1
 metadata:
-  name: nginx-service2
+  name: nginx-service
   labels:
-    name: nginx-service2
+    name: nginx-service
 spec:
   selector:
     app: nginx
   ports:
     - name: nginx-port
-      port: 8080
+      port: 80
       targetPort: 8080
       protocol: TCP
   type: LoadBalancer
@@ -32,7 +32,7 @@ spec:
     spec:
       containers:
         - name: nginx
-          image: dimitraz/reverse-nginx:1.0.0
+          image: dimitraz/reverse-nginx:1.0.2
           imagePullPolicy: Always
           ports:
             - containerPort: 8080

@@ -21,7 +21,8 @@ resource "aws_subnet" "public_subnets" {
   availability_zone = "${element(var.vpc_subnet_azs, count.index)}"
 
   tags {
-    Name = "${element(var.vpc_public_subnet_names, count.index)}"
+    Name                           = "${element(var.vpc_public_subnet_names, count.index)}"
+    "kubernetes.io/cluster/dz-fyp" = "shared"
   }
 }
 
@@ -33,7 +34,9 @@ resource "aws_subnet" "private_subnets" {
   availability_zone = "${element(var.vpc_subnet_azs, count.index)}"
 
   tags {
-    Name = "${element(var.vpc_private_subnet_names, count.index)}"
+    Name                              = "${element(var.vpc_private_subnet_names, count.index)}"
+    "kubernetes.io/role/internal-elb" = "1"
+    "kubernetes.io/cluster/dz-fyp"    = "shared"
   }
 }
 

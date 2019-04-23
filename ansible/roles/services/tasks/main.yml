@@ -66,3 +66,14 @@
   failed_when: result.stderr != "" and "already exists" not in result.stderr
 
 - file: path=/tmp/kafka-streamer.yaml state=absent
+
+- template:
+    src: api-gateway.yml.j2
+    dest: /tmp/api-gateway.yaml
+
+- name: Create the nginx reverse proxy api gateway
+  command: "kubectl create -f /tmp/api-gateway.yaml"
+  register: result
+  failed_when: result.stderr != "" and "already exists" not in result.stderr
+
+- file: path=/tmp/api-gateway.yaml state=absent
